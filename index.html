@@ -25,6 +25,7 @@
             --primary-color: #2563eb;
             --secondary-color: #10b981;
             --danger-color: #ef4444;
+            --warning-color: #f59e0b;
             --bg-color: #f3f4f6;
             --card-bg: #ffffff;
             --text-main: #1f2937;
@@ -40,7 +41,6 @@
             display: flex;
             justify-content: center;
             min-height: 100vh;
-            /* Prevent pull-to-refresh on mobile to feel more native */
             overscroll-behavior-y: none;
         }
 
@@ -52,21 +52,46 @@
             border-radius: 20px;
             box-shadow: 0 10px 25px rgba(0,0,0,0.05);
             transition: transform 0.3s ease;
-            margin-bottom: 40px; /* Space for install hint */
+            margin-bottom: 40px;
+            position: relative;
+        }
+
+        /* Header & Settings Icon */
+        .header-row {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            position: relative;
+            margin-bottom: 20px;
         }
 
         h1 {
             color: var(--text-main);
-            margin-bottom: 20px;
             font-size: 1.5rem;
             text-align: center;
             display: flex;
             align-items: center;
             justify-content: center;
             gap: 10px;
+            margin: 0;
         }
 
-        /* Stats Card with Animation */
+        .settings-btn {
+            position: absolute;
+            left: 0;
+            top: 50%;
+            transform: translateY(-50%);
+            background: none;
+            border: none;
+            color: var(--text-muted);
+            padding: 8px;
+            cursor: pointer;
+            width: auto;
+            box-shadow: none;
+        }
+        .settings-btn:active { transform: translateY(-50%) scale(0.9); }
+
+        /* Stats Card */
         .stats-card {
             background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
             color: white;
@@ -77,6 +102,7 @@
             box-shadow: 0 4px 15px rgba(37, 99, 235, 0.2);
             position: relative;
             overflow: hidden;
+            transition: all 0.3s ease;
         }
         
         .stats-card::before {
@@ -93,7 +119,18 @@
         @keyframes rotate { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
 
         .stats-content { position: relative; z-index: 1; }
-        .stats-card h2 { margin: 10px 0; font-size: 2.2rem; font-weight: 700; text-shadow: 0 2px 4px rgba(0,0,0,0.1); }
+        .stats-card h2 { 
+            margin: 10px 0; 
+            font-size: 2.2rem; 
+            font-weight: 700; 
+            text-shadow: 0 2px 4px rgba(0,0,0,0.1); 
+            line-height: 1.1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 2.5rem;
+        }
         .stats-card p { margin: 0; opacity: 0.9; font-size: 0.9rem; }
 
         /* Inputs Area */
@@ -112,7 +149,7 @@
             outline: none;
             transition: all 0.3s ease;
             font-family: inherit;
-            -webkit-appearance: none; /* Fix iOS input shadow */
+            -webkit-appearance: none;
         }
 
         input:focus { border-color: var(--primary-color); box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1); }
@@ -174,14 +211,12 @@
             max-height: 350px;
             overflow-y: auto;
             padding-right: 5px;
-            -webkit-overflow-scrolling: touch; /* Smooth scroll on iOS */
+            -webkit-overflow-scrolling: touch;
         }
 
-        /* Scrollbar Styling */
         .log-container::-webkit-scrollbar { width: 6px; }
         .log-container::-webkit-scrollbar-thumb { background-color: #ccc; border-radius: 4px; }
 
-        /* List Items Animation */
         .history-item {
             background: white;
             border: 1px solid #f3f4f6;
@@ -190,76 +225,103 @@
             margin-bottom: 10px;
             display: flex;
             justify-content: space-between;
-            align-items: flex-start; /* Align top for multi-line notes */
+            align-items: flex-start;
             animation: slideIn 0.4s ease-out forwards;
             opacity: 0;
             transform: translateY(10px);
+            position: relative;
         }
 
-        @keyframes slideIn {
-            to { opacity: 1; transform: translateY(0); }
-        }
+        @keyframes slideIn { to { opacity: 1; transform: translateY(0); } }
 
-        .history-item:nth-child(1) { animation-delay: 0.05s; }
-        .history-item:nth-child(2) { animation-delay: 0.1s; }
-        .history-item:nth-child(3) { animation-delay: 0.15s; }
-
-        .item-info { display: flex; flex-direction: column; gap: 4px; }
+        .item-info { display: flex; flex-direction: column; gap: 4px; flex-grow: 1; }
         .item-amount { font-weight: bold; color: var(--text-main); }
         .item-date { font-size: 0.85rem; color: var(--text-muted); }
         .item-note { font-size: 0.85rem; color: #555; background: #fffbe6; padding: 2px 6px; border-radius: 4px; display: inline-block; margin-top: 2px; border: 1px solid #fef3c7; width: fit-content; }
+        
+        .item-actions {
+            display: flex;
+            flex-direction: column;
+            align-items: flex-end;
+            gap: 5px;
+        }
+        
+        .delete-btn {
+            background: none;
+            border: none;
+            color: #ef4444;
+            padding: 4px;
+            width: auto;
+            opacity: 0.6;
+            cursor: pointer;
+            box-shadow: none;
+        }
+        .delete-btn:hover { opacity: 1; background: #fee2e2; border-radius: 50%; }
 
-        /* Settlement Separator Line */
+        /* Settlement Styling */
         .settlement-divider {
             margin: 20px 0;
             text-align: center;
             position: relative;
             animation: expandLine 0.5s ease-out;
         }
-
-        @keyframes expandLine {
-            from { opacity: 0; transform: scaleX(0); }
-            to { opacity: 1; transform: scaleX(1); }
-        }
-
-        .settlement-divider hr {
-            border: 0;
-            height: 1px;
-            background: #e5e7eb;
-            margin: 0;
-        }
-
+        .settlement-divider hr { border: 0; height: 1px; background: #e5e7eb; margin: 0; }
+        
         .settlement-label {
             position: absolute;
             top: 50%;
             left: 50%;
             transform: translate(-50%, -50%);
             background: #fff;
-            padding: 0 15px;
+            padding: 4px 15px;
             color: var(--danger-color);
-            font-size: 0.85rem;
+            font-size: 0.8rem;
             font-weight: bold;
-            border-radius: 10px;
+            border-radius: 15px;
             border: 1px solid #fee2e2;
             white-space: nowrap;
-        }
-        
-        .empty-state {
-            text-align: center;
-            color: var(--text-muted);
-            padding: 20px;
-            font-style: italic;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
         }
 
-        /* Install Hint */
-        .install-hint {
-            font-size: 0.8rem;
-            color: var(--text-muted);
-            text-align: center;
-            margin-top: 20px;
-            padding: 10px;
-            background: rgba(255,255,255,0.5);
-            border-radius: 10px;
+        .partial-settlement-label {
+            color: var(--warning-color);
+            border-color: #fef3c7;
+        }
+        
+        .empty-state { text-align: center; color: var(--text-muted); padding: 20px; font-style: italic; }
+        .install-hint { font-size: 0.8rem; color: var(--text-muted); text-align: center; margin-top: 20px; padding: 10px; background: rgba(255,255,255,0.5); border-radius: 10px; }
+
+        /* MODALS */
+        .modal-overlay {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.5); z-index: 1000;
+            display: flex; justify-content: center; align-items: center;
+            opacity: 0; pointer-events: none; transition: opacity 0.3s;
+        }
+        .modal-overlay.active { opacity: 1; pointer-events: all; }
+        
+        .modal-content {
+            background: white; width: 90%; max-width: 350px;
+            padding: 25px; border-radius: 20px; text-align: center;
+            transform: scale(0.9); transition: transform 0.3s;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.2);
+        }
+        .modal-overlay.active .modal-content { transform: scale(1); }
+        
+        .modal-title { font-size: 1.2rem; font-weight: bold; margin-bottom: 15px; }
+        .modal-actions { display: flex; flex-direction: column; gap: 10px; margin-top: 20px; }
+        
+        .btn-secondary { background-color: #e5e7eb; color: #374151; box-shadow: none; }
+        .btn-secondary:hover { background-color: #d1d5db; }
+        
+        .btn-danger { background-color: #ef4444; color: white; box-shadow: 0 4px 10px rgba(239, 68, 68, 0.2); }
+        
+        .btn-warning { background-color: var(--warning-color); color: white; box-shadow: 0 4px 10px rgba(245, 158, 11, 0.2); }
+        
+        .modal-close {
+            position: absolute; top: 15px; left: 15px;
+            background: none; border: none; font-size: 1.5rem; color: #9ca3af;
+            cursor: pointer; width: auto; padding: 0; box-shadow: none;
         }
 
     </style>
@@ -267,11 +329,15 @@
 <body>
 
 <div class="container">
-    <h1>
-        <!-- Simple SVG Icon -->
-        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2v20"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
-        حساب الإنتاج
-    </h1>
+    <div class="header-row">
+        <button class="settings-btn" onclick="openSettings()">
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path></svg>
+        </button>
+        <h1>
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2v20"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
+            حساب الإنتاج
+        </h1>
+    </div>
 
     <div class="stats-card">
         <div class="stats-content">
@@ -301,13 +367,48 @@
         </div>
     </div>
 
-    <button class="btn-settle" onclick="settleAccount()">
+    <button class="btn-settle" onclick="openSettlementModal()">
         <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"></path><polyline points="9 11 12 14 22 4"></polyline></svg>
-        تصفية الحساب (بدء جديد)
+        تصفية الحساب
     </button>
 
     <div class="install-hint" id="install-hint">
         لتثبيت التطبيق: اضغط على زر المشاركة (iOS) أو القائمة (Android) ثم اختر "إضافة إلى الشاشة الرئيسية"
+    </div>
+</div>
+
+<!-- SETTINGS MODAL -->
+<div class="modal-overlay" id="settings-modal">
+    <div class="modal-content">
+        <button class="modal-close" onclick="closeModal('settings-modal')">&times;</button>
+        <div class="modal-title">الإعدادات</div>
+        <p>تحذير: هذا الإجراء لا يمكن التراجع عنه</p>
+        <div class="modal-actions">
+            <button class="btn-danger" onclick="resetAllData()">حذف جميع البيانات (تصفير كامل)</button>
+        </div>
+    </div>
+</div>
+
+<!-- SETTLEMENT MODAL -->
+<div class="modal-overlay" id="settlement-modal">
+    <div class="modal-content">
+        <button class="modal-close" onclick="closeModal('settlement-modal')">&times;</button>
+        <div class="modal-title">خيار التصفية</div>
+        <div style="margin-bottom: 15px; text-align: right;">
+            <p>المبلغ الكلي المستحق: <strong id="settle-modal-amount">0.00</strong> شيقل</p>
+        </div>
+        
+        <div class="modal-actions">
+            <button class="btn-danger" onclick="executeFullSettlement()">تصفية كاملة (بدء جديد)</button>
+            
+            <div style="border-top: 1px solid #eee; margin-top: 10px; padding-top: 15px;">
+                <p style="font-size: 0.9rem; margin-bottom: 5px;">تصفية جزء من المبلغ (دفعة):</p>
+                <div style="display: flex; gap: 5px;">
+                    <button class="btn-warning" style="width: auto; padding: 10px 15px;" onclick="executePartialSettlement()">سداد</button>
+                    <input type="number" id="partial-amount-input" placeholder="المبلغ (شيقل)" style="margin:0; width: 100%;">
+                </div>
+            </div>
+        </div>
     </div>
 </div>
 
@@ -322,33 +423,25 @@
         "display": "standalone",
         "background_color": "#f3f4f6",
         "theme_color": "#2563eb",
-        "icons": [
-            {
-                "src": iconSVG,
-                "sizes": "512x512",
-                "type": "image/svg+xml"
-            }
-        ]
+        "icons": [{ "src": iconSVG, "sizes": "512x512", "type": "image/svg+xml" }]
     };
     
-    const stringManifest = JSON.stringify(manifest);
-    const blob = new Blob([stringManifest], {type: 'application/json'});
-    const manifestURL = URL.createObjectURL(blob);
-    document.getElementById('manifest-placeholder').setAttribute('href', manifestURL);
+    const blob = new Blob([JSON.stringify(manifest)], {type: 'application/json'});
+    document.getElementById('manifest-placeholder').setAttribute('href', URL.createObjectURL(blob));
 
     // --- APP LOGIC ---
 
-    // Configuration
-    const RATE = 5 / 1000; // 5 Shekels per 1000 cigarettes
+    const RATE = 5 / 1000; 
     const STORAGE_KEY = 'cigaretteData_v2'; 
 
-    // Initial State
     let state = JSON.parse(localStorage.getItem(STORAGE_KEY)) || {
         currentCount: 0,
-        logs: [] 
+        logs: [],
+        lastFullSettlementId: 0 
     };
 
-    // DOM Elements
+    if(typeof state.lastFullSettlementId === 'undefined') state.lastFullSettlementId = 0;
+
     const elTotalCount = document.getElementById('total-count');
     const elTotalMoney = document.getElementById('total-money');
     const elLogList = document.getElementById('log-list');
@@ -356,51 +449,56 @@
     const elInputDate = document.getElementById('date-input');
     const elInputNote = document.getElementById('note-input');
 
-    // Initialize Date Input with Today
     function initDate() {
-        const today = new Date();
-        elInputDate.value = today.toISOString().split('T')[0];
+        elInputDate.value = new Date().toISOString().split('T')[0];
     }
 
-    // Helper: Get Day Name in Arabic
     function getDayName(dateStr) {
-        const date = new Date(dateStr);
-        return date.toLocaleDateString('ar-EG', { weekday: 'long' });
+        return new Date(dateStr).toLocaleDateString('ar-EG', { weekday: 'long' });
     }
 
-    // Update UI
-    function updateUI() {
-        // Animate Counter
-        animateValue(elTotalCount, parseInt(elTotalCount.innerText.replace(/,/g, '')) || 0, state.currentCount, 500);
-        
-        const money = (state.currentCount * RATE).toFixed(2);
-        elTotalMoney.innerText = `${money} شيقل`;
+    // --- UI UPDATES ---
 
-        // Render Logs
+    function updateUI() {
+        // Track visual state to prevent parsing errors on complex text
+        const startVal = typeof elTotalCount.currentValue !== 'undefined' ? elTotalCount.currentValue : 0;
+        const endVal = state.currentCount;
+        elTotalCount.currentValue = endVal;
+
+        // Use new formatter
+        animateValue(elTotalCount, startVal, endVal, 500, formatProductionDisplay);
+
+        elTotalMoney.innerText = `${(state.currentCount * RATE).toFixed(2)} شيقل`;
+
         elLogList.innerHTML = '';
         
         if (state.logs.length === 0) {
             elLogList.innerHTML = '<div class="empty-state">لا توجد عمليات مسجلة بعد</div>';
         } else {
-            // Copy logs, reverse to show newest first
             const logsToShow = [...state.logs].reverse();
 
             logsToShow.forEach(log => {
+                const div = document.createElement('div');
+                
                 if (log.type === 'settle') {
-                    // Render Separator Line
-                    const div = document.createElement('div');
+                    // Full Settlement Separator
                     div.className = 'settlement-divider';
                     div.innerHTML = `
                         <hr>
-                        <span class="settlement-label">تمت التصفية: ${log.amount} شيقل - ${log.date}</span>
+                        <span class="settlement-label">تصفية كاملة: ${log.amount} ₪ - ${log.date}</span>
                     `;
-                    elLogList.appendChild(div);
+                } else if (log.type === 'partial') {
+                    // Partial Settlement Log
+                     div.className = 'settlement-divider';
+                     div.innerHTML = `
+                        <hr style="background:var(--warning-color); opacity:0.3;">
+                        <span class="settlement-label partial-settlement-label">دفعة: ${log.moneyPaid} ₪ - ${log.date}</span>
+                    `;
                 } else {
-                    // Render Normal Item
-                    const div = document.createElement('div');
+                    // Normal Entry (Add)
                     div.className = 'history-item';
-                    
                     const noteHtml = log.note ? `<div class="item-note">${log.note}</div>` : '';
+                    const moneyVal = (log.amount * RATE).toFixed(2);
 
                     div.innerHTML = `
                         <div class="item-info">
@@ -408,20 +506,38 @@
                             <span class="item-date">${log.dayName}، ${log.date}</span>
                             ${noteHtml}
                         </div>
-                        <div style="color: var(--secondary-color); font-weight:bold; align-self: center;">
-                            ${(log.amount * RATE).toFixed(2)} ₪
+                        <div class="item-actions">
+                            <div style="color: var(--secondary-color); font-weight:bold;">${moneyVal} ₪</div>
+                            <button class="delete-btn" onclick="deleteItem(${log.id})">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
+                            </button>
                         </div>
                     `;
-                    elLogList.appendChild(div);
                 }
+                elLogList.appendChild(div);
             });
         }
 
-        // Save to LocalStorage
         localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
     }
 
-    // Add Data Function
+    // --- FORMATTER ---
+    function formatProductionDisplay(value) {
+        if (value >= 10000) {
+            const cartons = Math.floor(value / 10000);
+            const remainder = value % 10000;
+            return `
+                <span>${cartons} <span style="font-size: 0.5em; opacity: 0.9;">كرتونة</span></span>
+                <span style="font-size: 0.4em; opacity: 0.85; font-weight: normal; margin-top: 5px;">
+                    ${remainder.toLocaleString()} سيجارة
+                </span>
+            `;
+        }
+        return value.toLocaleString();
+    }
+
+    // --- CORE ACTIONS ---
+
     function addData() {
         const amount = parseInt(elInputAmount.value);
         const dateVal = elInputDate.value;
@@ -431,7 +547,6 @@
             alert("الرجاء إدخال عدد صحيح أكبر من صفر");
             return;
         }
-
         if (!dateVal) {
             alert("الرجاء اختيار تاريخ");
             return;
@@ -451,65 +566,154 @@
         state.logs.push(newLog);
 
         elInputAmount.value = '';
-        elInputNote.value = ''; // Clear note
+        elInputNote.value = '';
         elInputAmount.focus();
         updateUI();
     }
 
-    // Settle Account Function
-    function settleAccount() {
+    function deleteItem(id) {
+        if(!confirm("هل أنت متأكد من حذف هذا السجل؟")) return;
+
+        const index = state.logs.findIndex(l => l.id === id);
+        if (index === -1) return;
+
+        const log = state.logs[index];
+        
+        if (log.type === 'add') {
+            state.currentCount -= log.amount;
+            if(state.currentCount < 0) state.currentCount = 0; 
+        }
+
+        state.logs.splice(index, 1);
+        updateUI();
+    }
+
+    // --- SETTLEMENT LOGIC ---
+
+    function openSettlementModal() {
         if (state.currentCount === 0) {
             alert("الرصيد صفر بالفعل!");
             return;
         }
-
         const totalMoney = (state.currentCount * RATE).toFixed(2);
-        
-        if (confirm(`هل تريد تصفية الحساب فعلاً؟\nالمبلغ المستحق للدفع: ${totalMoney} شيقل\nسيتم وضع خط فاصل وبدء عداد جديد.`)) {
-            
-            const today = new Date();
-            const dateStr = today.toISOString().split('T')[0];
-
-            // Add Settlement Marker
-            const settleLog = {
-                id: Date.now(),
-                type: 'settle',
-                amount: totalMoney, // storing money amount here for display
-                date: dateStr,
-                dayName: getDayName(dateStr),
-                timestamp: today.toISOString()
-            };
-
-            state.logs.push(settleLog);
-            state.currentCount = 0;
-            
-            updateUI();
-        }
+        document.getElementById('settle-modal-amount').innerText = totalMoney;
+        document.getElementById('partial-amount-input').value = '';
+        openModal('settlement-modal');
     }
 
-    // Number Animation Helper
-    function animateValue(obj, start, end, duration) {
-        if (start === end) return;
+    function executeFullSettlement() {
+        const totalMoney = (state.currentCount * RATE).toFixed(2);
+        const today = new Date();
+        const dateStr = today.toISOString().split('T')[0];
+
+        state.logs.push({
+            id: Date.now(),
+            type: 'settle',
+            amount: totalMoney,
+            date: dateStr,
+            dayName: getDayName(dateStr),
+            timestamp: today.toISOString()
+        });
+
+        state.lastFullSettlementId = Date.now();
+        state.currentCount = 0;
+
+        closeModal('settlement-modal');
+        updateUI();
+    }
+
+    function executePartialSettlement() {
+        const moneyInput = document.getElementById('partial-amount-input');
+        const moneyPaid = parseFloat(moneyInput.value);
+
+        if (isNaN(moneyPaid) || moneyPaid <= 0) {
+            alert("الرجاء إدخال مبلغ صحيح");
+            return;
+        }
+
+        const totalDue = state.currentCount * RATE;
+        if (moneyPaid > totalDue) {
+            alert(`المبلغ المدخل أكبر من المستحق (${totalDue.toFixed(2)} شيقل)`);
+            return;
+        }
+
+        const cigarettesPaid = Math.floor(moneyPaid / RATE);
+
+        state.currentCount -= cigarettesPaid;
+        
+        const today = new Date();
+        const dateStr = today.toISOString().split('T')[0];
+
+        state.logs.push({
+            id: Date.now(),
+            type: 'partial',
+            moneyPaid: moneyPaid.toFixed(2),
+            amount: cigarettesPaid, 
+            date: dateStr,
+            dayName: getDayName(dateStr),
+            timestamp: today.toISOString()
+        });
+
+        closeModal('settlement-modal');
+        updateUI();
+    }
+
+    // --- SETTINGS LOGIC ---
+
+    function openSettings() {
+        openModal('settings-modal');
+    }
+
+    function resetAllData() {
+        localStorage.removeItem(STORAGE_KEY);
+        state = { currentCount: 0, logs: [], lastFullSettlementId: 0 };
+        closeModal('settings-modal');
+        updateUI();
+        alert("تم حذف جميع البيانات بنجاح");
+    }
+
+    // --- UTILS ---
+
+    function openModal(id) {
+        document.getElementById(id).classList.add('active');
+    }
+
+    function closeModal(id) {
+        document.getElementById(id).classList.remove('active');
+    }
+
+    function animateValue(obj, start, end, duration, formatter) {
+        if (start === end) {
+            obj.innerHTML = formatter ? formatter(end) : end.toLocaleString();
+            return;
+        }
         let startTimestamp = null;
         const step = (timestamp) => {
             if (!startTimestamp) startTimestamp = timestamp;
             const progress = Math.min((timestamp - startTimestamp) / duration, 1);
-            obj.innerHTML = Math.floor(progress * (end - start) + start).toLocaleString();
+            const currentVal = Math.floor(progress * (end - start) + start);
+            
+            obj.innerHTML = formatter ? formatter(currentVal) : currentVal.toLocaleString();
+
             if (progress < 1) {
                 window.requestAnimationFrame(step);
             } else {
-                obj.innerHTML = end.toLocaleString();
+                obj.innerHTML = formatter ? formatter(end) : end.toLocaleString();
             }
         };
         window.requestAnimationFrame(step);
     }
 
-    // Check if in standalone mode (already installed)
     if (window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone === true) {
         document.getElementById('install-hint').style.display = 'none';
     }
 
-    // Initialize
+    window.onclick = function(event) {
+        if (event.target.classList.contains('modal-overlay')) {
+            event.target.classList.remove('active');
+        }
+    }
+
     initDate();
     updateUI();
 
