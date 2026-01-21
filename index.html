@@ -13,14 +13,9 @@
     <meta name="theme-color" content="#2563eb">
     <meta name="mobile-web-app-capable" content="yes">
 
-    <!-- Embedded Icon (Base64 SVG) -->
-    <link rel="icon" href="https://goldstoreb1.blogspot.com/favicon.ico">
-    <link rel="apple-touch-icon" href="https://goldstoreb1.blogspot.com/favicon.ico">
-        <link href='https://goldstoreb1.blogspot.com/favicon.ico' rel='apple-touch-icon' sizes='120x120'/>
-    <link href='https://goldstoreb1.blogspot.com/favicon.ico' rel='apple-touch-icon' sizes='152x152'/>
-    <link href='https://goldstoreb1.blogspot.com/favicon.ico' rel='icon' type='image/x-icon'/>
-    <link href='https://goldstoreb1.blogspot.com/favicon.ico' rel='shortcut icon' type='image/x-icon'/>
-
+    <!-- Icons - placeholders that will be updated by JS with PNG data -->
+    <link rel="icon" type="image/png" id="favicon-link">
+    <link rel="apple-touch-icon" id="apple-touch-icon-link">
 
     <!-- Embedded Web Manifest -->
     <link rel="manifest" id="manifest-placeholder">
@@ -418,21 +413,48 @@
 </div>
 
 <script>
-    // --- MANIFEST GENERATION (Data URI for Single File) ---
-    const iconSVG = `data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCA1MTIgNTEyIj48cmVjdCB3aWR0aD0iNTEyIiBoZWlnaHQ9IjUxMiIgcng9IjEyMCIgZmlsbD0iIzI1NjNlYiIvPjx0ZXh0IHg9IjUwJSIgeT0iNTUlIiBkb21pbmFudC1iYXNlbGluZT0ibWlkZGxlIiB0ZXh0LWFuY2hvcj0ibWlkZGxlIiBmaWxsPSIjZmZmZmZmIiBmb250LWZhbWlseT0ic2Fucy1zZXJpZiIgZm9udC1zaXplPSIyODAiIGZvbnQtd2VpZ2h0PSJib2xkIj7ipqQ8L3RleHQ+PC9zdmc+`;
+    // --- ICON GENERATION LOGIC (SVG -> PNG) ---
+    // This is the key fix: We convert the SVG to a PNG canvas on load, 
+    // then use that PNG for the manifest and apple-touch-icon.
+    // This makes it compatible with iOS and Android home screens.
     
-    const manifest = {
-        "name": "محاسب إنتاج السجائر",
-        "short_name": "محاسب إنتاج",
-        "start_url": ".",
-        "display": "standalone",
-        "background_color": "#f3f4f6",
-        "theme_color": "#2563eb",
-        "icons": [{ "src": iconSVG, "sizes": "512x512", "type": "image/svg+xml" }]
-    };
-    
-    const blob = new Blob([JSON.stringify(manifest)], {type: 'application/json'});
-    document.getElementById('manifest-placeholder').setAttribute('href', URL.createObjectURL(blob));
+    (function setupAppIcon() {
+        const iconSVGString = `data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCA1MTIgNTEyIj48cmVjdCB3aWR0aD0iNTEyIiBoZWlnaHQ9IjUxMiIgcng9IjEyMCIgZmlsbD0iIzI1NjNlYiIvPjx0ZXh0IHg9IjUwJSIgeT0iNTUlIiBkb21pbmFudC1iYXNlbGluZT0ibWlkZGxlIiB0ZXh0LWFuY2hvcj0ibWlkZGxlIiBmaWxsPSIjZmZmZmZmIiBmb250LWZhbWlseT0ic2Fucy1zZXJpZiIgZm9udC1zaXplPSIyODAiIGZvbnQtd2VpZ2h0PSJib2xkIj7ipqQ8L3RleHQ+PC9zdmc+`;
+        
+        const canvas = document.createElement('canvas');
+        canvas.width = 512;
+        canvas.height = 512;
+        const ctx = canvas.getContext('2d');
+        const img = new Image();
+        
+        img.onload = function() {
+            ctx.drawImage(img, 0, 0);
+            // Convert to PNG Data URI
+            const pngDataUrl = canvas.toDataURL('image/png');
+            
+            // 1. Update Head Links
+            document.getElementById('favicon-link').href = pngDataUrl;
+            document.getElementById('apple-touch-icon-link').href = pngDataUrl;
+            
+            // 2. Generate Manifest with PNG
+            const manifest = {
+                "name": "محاسب إنتاج السجائر",
+                "short_name": "محاسب إنتاج",
+                "start_url": ".",
+                "display": "standalone",
+                "background_color": "#f3f4f6",
+                "theme_color": "#2563eb",
+                "icons": [
+                    { "src": pngDataUrl, "sizes": "512x512", "type": "image/png" }
+                ]
+            };
+            
+            const blob = new Blob([JSON.stringify(manifest)], {type: 'application/json'});
+            document.getElementById('manifest-placeholder').setAttribute('href', URL.createObjectURL(blob));
+        };
+        
+        img.src = iconSVGString;
+    })();
 
     // --- APP LOGIC ---
 
@@ -726,6 +748,3 @@
 
 </body>
 </html>
-
-
-
