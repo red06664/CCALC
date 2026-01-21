@@ -1,0 +1,519 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>محاسب الإنتاج</title>
+    
+    <!-- PWA / Installability Meta Tags -->
+    <meta name="application-name" content="محاسب الإنتاج">
+    <meta name="apple-mobile-web-app-title" content="محاسب الإنتاج">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="theme-color" content="#2563eb">
+    <meta name="mobile-web-app-capable" content="yes">
+
+    <!-- Embedded Icon (Base64 SVG) -->
+    <link rel="icon" type="image/svg+xml" href="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCA1MTIgNTEyIj48cmVjdCB3aWR0aD0iNTEyIiBoZWlnaHQ9IjUxMiIgcng9IjEyMCIgZmlsbD0iIzI1NjNlYiIvPjx0ZXh0IHg9IjUwJSIgeT0iNTUlIiBkb21pbmFudC1iYXNlbGluZT0ibWlkZGxlIiB0ZXh0LWFuY2hvcj0ibWlkZGxlIiBmaWxsPSIjZmZmZmZmIiBmb250LWZhbWlseT0ic2Fucy1zZXJpZiIgZm9udC1zaXplPSIyODAiIGZvbnQtd2VpZ2h0PSJib2xkIj7ipqQ8L3RleHQ+PC9zdmc+">
+    <link rel="apple-touch-icon" href="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCA1MTIgNTEyIj48cmVjdCB3aWR0aD0iNTEyIiBoZWlnaHQ9IjUxMiIgcng9IjEyMCIgZmlsbD0iIzI1NjNlYiIvPjx0ZXh0IHg9IjUwJSIgeT0iNTUlIiBkb21pbmFudC1iYXNlbGluZT0ibWlkZGxlIiB0ZXh0LWFuY2hvcj0ibWlkZGxlIiBmaWxsPSIjZmZmZmZmIiBmb250LWZhbWlseT0ic2Fucy1zZXJpZiIgZm9udC1zaXplPSIyODAiIGZvbnQtd2VpZ2h0PSJib2xkIj7ipqQ8L3RleHQ+PC9zdmc+">
+
+    <!-- Embedded Web Manifest -->
+    <link rel="manifest" id="manifest-placeholder">
+
+    <style>
+        :root {
+            --primary-color: #2563eb;
+            --secondary-color: #10b981;
+            --danger-color: #ef4444;
+            --bg-color: #f3f4f6;
+            --card-bg: #ffffff;
+            --text-main: #1f2937;
+            --text-muted: #6b7280;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: var(--bg-color);
+            margin: 0;
+            padding: 20px;
+            color: var(--text-main);
+            display: flex;
+            justify-content: center;
+            min-height: 100vh;
+            /* Prevent pull-to-refresh on mobile to feel more native */
+            overscroll-behavior-y: none;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 500px;
+            background: var(--card-bg);
+            padding: 25px;
+            border-radius: 20px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.05);
+            transition: transform 0.3s ease;
+            margin-bottom: 40px; /* Space for install hint */
+        }
+
+        h1 {
+            color: var(--text-main);
+            margin-bottom: 20px;
+            font-size: 1.5rem;
+            text-align: center;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+        }
+
+        /* Stats Card with Animation */
+        .stats-card {
+            background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+            color: white;
+            padding: 20px;
+            border-radius: 16px;
+            margin-bottom: 25px;
+            text-align: center;
+            box-shadow: 0 4px 15px rgba(37, 99, 235, 0.2);
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .stats-card::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle, rgba(255,255,255,0.1) 0%, transparent 60%);
+            animation: rotate 10s linear infinite;
+        }
+
+        @keyframes rotate { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+
+        .stats-content { position: relative; z-index: 1; }
+        .stats-card h2 { margin: 10px 0; font-size: 2.2rem; font-weight: 700; text-shadow: 0 2px 4px rgba(0,0,0,0.1); }
+        .stats-card p { margin: 0; opacity: 0.9; font-size: 0.9rem; }
+
+        /* Inputs Area */
+        .input-group {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 10px;
+            flex-wrap: wrap;
+        }
+
+        input {
+            padding: 14px;
+            border: 2px solid #e5e7eb;
+            border-radius: 12px;
+            font-size: 16px;
+            outline: none;
+            transition: all 0.3s ease;
+            font-family: inherit;
+            -webkit-appearance: none; /* Fix iOS input shadow */
+        }
+
+        input:focus { border-color: var(--primary-color); box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1); }
+        
+        .date-input { flex: 1; min-width: 130px; }
+        .amount-input { flex: 1.5; min-width: 130px; }
+        .note-input { width: 100%; margin-bottom: 5px; }
+
+        /* Buttons */
+        button {
+            width: 100%;
+            padding: 14px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            border: none;
+            border-radius: 12px;
+            transition: transform 0.2s, box-shadow 0.2s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        button:active { transform: scale(0.98); }
+
+        .btn-add {
+            background-color: var(--secondary-color);
+            color: white;
+            box-shadow: 0 4px 10px rgba(16, 185, 129, 0.2);
+            margin-top: 5px;
+        }
+        .btn-add:hover { background-color: #059669; }
+
+        .btn-settle {
+            background-color: var(--danger-color);
+            color: white;
+            margin-top: 20px;
+            box-shadow: 0 4px 10px rgba(239, 68, 68, 0.2);
+        }
+        .btn-settle:hover { background-color: #dc2626; }
+
+        /* History Log */
+        .history {
+            margin-top: 30px;
+            text-align: right;
+        }
+        
+        .history h3 {
+            font-size: 1.1rem;
+            color: var(--text-main);
+            border-bottom: 2px solid #f3f4f6;
+            padding-bottom: 10px;
+            margin-bottom: 15px;
+        }
+
+        .log-container {
+            max-height: 350px;
+            overflow-y: auto;
+            padding-right: 5px;
+            -webkit-overflow-scrolling: touch; /* Smooth scroll on iOS */
+        }
+
+        /* Scrollbar Styling */
+        .log-container::-webkit-scrollbar { width: 6px; }
+        .log-container::-webkit-scrollbar-thumb { background-color: #ccc; border-radius: 4px; }
+
+        /* List Items Animation */
+        .history-item {
+            background: white;
+            border: 1px solid #f3f4f6;
+            padding: 12px 15px;
+            border-radius: 10px;
+            margin-bottom: 10px;
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start; /* Align top for multi-line notes */
+            animation: slideIn 0.4s ease-out forwards;
+            opacity: 0;
+            transform: translateY(10px);
+        }
+
+        @keyframes slideIn {
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .history-item:nth-child(1) { animation-delay: 0.05s; }
+        .history-item:nth-child(2) { animation-delay: 0.1s; }
+        .history-item:nth-child(3) { animation-delay: 0.15s; }
+
+        .item-info { display: flex; flex-direction: column; gap: 4px; }
+        .item-amount { font-weight: bold; color: var(--text-main); }
+        .item-date { font-size: 0.85rem; color: var(--text-muted); }
+        .item-note { font-size: 0.85rem; color: #555; background: #fffbe6; padding: 2px 6px; border-radius: 4px; display: inline-block; margin-top: 2px; border: 1px solid #fef3c7; width: fit-content; }
+
+        /* Settlement Separator Line */
+        .settlement-divider {
+            margin: 20px 0;
+            text-align: center;
+            position: relative;
+            animation: expandLine 0.5s ease-out;
+        }
+
+        @keyframes expandLine {
+            from { opacity: 0; transform: scaleX(0); }
+            to { opacity: 1; transform: scaleX(1); }
+        }
+
+        .settlement-divider hr {
+            border: 0;
+            height: 1px;
+            background: #e5e7eb;
+            margin: 0;
+        }
+
+        .settlement-label {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: #fff;
+            padding: 0 15px;
+            color: var(--danger-color);
+            font-size: 0.85rem;
+            font-weight: bold;
+            border-radius: 10px;
+            border: 1px solid #fee2e2;
+            white-space: nowrap;
+        }
+        
+        .empty-state {
+            text-align: center;
+            color: var(--text-muted);
+            padding: 20px;
+            font-style: italic;
+        }
+
+        /* Install Hint */
+        .install-hint {
+            font-size: 0.8rem;
+            color: var(--text-muted);
+            text-align: center;
+            margin-top: 20px;
+            padding: 10px;
+            background: rgba(255,255,255,0.5);
+            border-radius: 10px;
+        }
+
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h1>
+        <!-- Simple SVG Icon -->
+        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2v20"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
+        حساب الإنتاج
+    </h1>
+
+    <div class="stats-card">
+        <div class="stats-content">
+            <p>الإجمالي الحالي (غير مدفوع)</p>
+            <h2 id="total-count">0</h2>
+            <p id="total-money" style="font-size: 1.2rem; font-weight: 600;">0.00 شيقل</p>
+        </div>
+    </div>
+
+    <div class="input-group">
+        <input type="date" id="date-input" class="date-input">
+        <input type="number" id="cigarette-input" class="amount-input" placeholder="عدد السجائر (مثلاً 500)">
+    </div>
+    <div class="input-group">
+        <input type="text" id="note-input" class="note-input" placeholder="ملاحظة (اختياري)...">
+    </div>
+    
+    <button class="btn-add" onclick="addData()">
+        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+        إضافة للرصيد
+    </button>
+
+    <div class="history">
+        <h3>سجل العمليات</h3>
+        <div id="log-list" class="log-container">
+            <!-- Items will appear here -->
+        </div>
+    </div>
+
+    <button class="btn-settle" onclick="settleAccount()">
+        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"></path><polyline points="9 11 12 14 22 4"></polyline></svg>
+        تصفية الحساب (بدء جديد)
+    </button>
+
+    <div class="install-hint" id="install-hint">
+        لتثبيت التطبيق: اضغط على زر المشاركة (iOS) أو القائمة (Android) ثم اختر "إضافة إلى الشاشة الرئيسية"
+    </div>
+</div>
+
+<script>
+    // --- MANIFEST GENERATION (Data URI for Single File) ---
+    const iconSVG = `data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCA1MTIgNTEyIj48cmVjdCB3aWR0aD0iNTEyIiBoZWlnaHQ9IjUxMiIgcng9IjEyMCIgZmlsbD0iIzI1NjNlYiIvPjx0ZXh0IHg9IjUwJSIgeT0iNTUlIiBkb21pbmFudC1iYXNlbGluZT0ibWlkZGxlIiB0ZXh0LWFuY2hvcj0ibWlkZGxlIiBmaWxsPSIjZmZmZmZmIiBmb250LWZhbWlseT0ic2Fucy1zZXJpZiIgZm9udC1zaXplPSIyODAiIGZvbnQtd2VpZ2h0PSJib2xkIj7ipqQ8L3RleHQ+PC9zdmc+`;
+    
+    const manifest = {
+        "name": "محاسب إنتاج السجائر",
+        "short_name": "محاسب إنتاج",
+        "start_url": ".",
+        "display": "standalone",
+        "background_color": "#f3f4f6",
+        "theme_color": "#2563eb",
+        "icons": [
+            {
+                "src": iconSVG,
+                "sizes": "512x512",
+                "type": "image/svg+xml"
+            }
+        ]
+    };
+    
+    const stringManifest = JSON.stringify(manifest);
+    const blob = new Blob([stringManifest], {type: 'application/json'});
+    const manifestURL = URL.createObjectURL(blob);
+    document.getElementById('manifest-placeholder').setAttribute('href', manifestURL);
+
+    // --- APP LOGIC ---
+
+    // Configuration
+    const RATE = 5 / 1000; // 5 Shekels per 1000 cigarettes
+    const STORAGE_KEY = 'cigaretteData_v2'; 
+
+    // Initial State
+    let state = JSON.parse(localStorage.getItem(STORAGE_KEY)) || {
+        currentCount: 0,
+        logs: [] 
+    };
+
+    // DOM Elements
+    const elTotalCount = document.getElementById('total-count');
+    const elTotalMoney = document.getElementById('total-money');
+    const elLogList = document.getElementById('log-list');
+    const elInputAmount = document.getElementById('cigarette-input');
+    const elInputDate = document.getElementById('date-input');
+    const elInputNote = document.getElementById('note-input');
+
+    // Initialize Date Input with Today
+    function initDate() {
+        const today = new Date();
+        elInputDate.value = today.toISOString().split('T')[0];
+    }
+
+    // Helper: Get Day Name in Arabic
+    function getDayName(dateStr) {
+        const date = new Date(dateStr);
+        return date.toLocaleDateString('ar-EG', { weekday: 'long' });
+    }
+
+    // Update UI
+    function updateUI() {
+        // Animate Counter
+        animateValue(elTotalCount, parseInt(elTotalCount.innerText.replace(/,/g, '')) || 0, state.currentCount, 500);
+        
+        const money = (state.currentCount * RATE).toFixed(2);
+        elTotalMoney.innerText = `${money} شيقل`;
+
+        // Render Logs
+        elLogList.innerHTML = '';
+        
+        if (state.logs.length === 0) {
+            elLogList.innerHTML = '<div class="empty-state">لا توجد عمليات مسجلة بعد</div>';
+        } else {
+            // Copy logs, reverse to show newest first
+            const logsToShow = [...state.logs].reverse();
+
+            logsToShow.forEach(log => {
+                if (log.type === 'settle') {
+                    // Render Separator Line
+                    const div = document.createElement('div');
+                    div.className = 'settlement-divider';
+                    div.innerHTML = `
+                        <hr>
+                        <span class="settlement-label">تمت التصفية: ${log.amount} شيقل - ${log.date}</span>
+                    `;
+                    elLogList.appendChild(div);
+                } else {
+                    // Render Normal Item
+                    const div = document.createElement('div');
+                    div.className = 'history-item';
+                    
+                    const noteHtml = log.note ? `<div class="item-note">${log.note}</div>` : '';
+
+                    div.innerHTML = `
+                        <div class="item-info">
+                            <span class="item-amount">+ ${log.amount} سيجارة</span>
+                            <span class="item-date">${log.dayName}، ${log.date}</span>
+                            ${noteHtml}
+                        </div>
+                        <div style="color: var(--secondary-color); font-weight:bold; align-self: center;">
+                            ${(log.amount * RATE).toFixed(2)} ₪
+                        </div>
+                    `;
+                    elLogList.appendChild(div);
+                }
+            });
+        }
+
+        // Save to LocalStorage
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+    }
+
+    // Add Data Function
+    function addData() {
+        const amount = parseInt(elInputAmount.value);
+        const dateVal = elInputDate.value;
+        const noteVal = elInputNote.value.trim();
+
+        if (isNaN(amount) || amount <= 0) {
+            alert("الرجاء إدخال عدد صحيح أكبر من صفر");
+            return;
+        }
+
+        if (!dateVal) {
+            alert("الرجاء اختيار تاريخ");
+            return;
+        }
+
+        const newLog = {
+            id: Date.now(),
+            type: 'add',
+            amount: amount,
+            date: dateVal,
+            dayName: getDayName(dateVal),
+            note: noteVal,
+            timestamp: new Date().toISOString()
+        };
+
+        state.currentCount += amount;
+        state.logs.push(newLog);
+
+        elInputAmount.value = '';
+        elInputNote.value = ''; // Clear note
+        elInputAmount.focus();
+        updateUI();
+    }
+
+    // Settle Account Function
+    function settleAccount() {
+        if (state.currentCount === 0) {
+            alert("الرصيد صفر بالفعل!");
+            return;
+        }
+
+        const totalMoney = (state.currentCount * RATE).toFixed(2);
+        
+        if (confirm(`هل تريد تصفية الحساب فعلاً؟\nالمبلغ المستحق للدفع: ${totalMoney} شيقل\nسيتم وضع خط فاصل وبدء عداد جديد.`)) {
+            
+            const today = new Date();
+            const dateStr = today.toISOString().split('T')[0];
+
+            // Add Settlement Marker
+            const settleLog = {
+                id: Date.now(),
+                type: 'settle',
+                amount: totalMoney, // storing money amount here for display
+                date: dateStr,
+                dayName: getDayName(dateStr),
+                timestamp: today.toISOString()
+            };
+
+            state.logs.push(settleLog);
+            state.currentCount = 0;
+            
+            updateUI();
+        }
+    }
+
+    // Number Animation Helper
+    function animateValue(obj, start, end, duration) {
+        if (start === end) return;
+        let startTimestamp = null;
+        const step = (timestamp) => {
+            if (!startTimestamp) startTimestamp = timestamp;
+            const progress = Math.min((timestamp - startTimestamp) / duration, 1);
+            obj.innerHTML = Math.floor(progress * (end - start) + start).toLocaleString();
+            if (progress < 1) {
+                window.requestAnimationFrame(step);
+            } else {
+                obj.innerHTML = end.toLocaleString();
+            }
+        };
+        window.requestAnimationFrame(step);
+    }
+
+    // Check if in standalone mode (already installed)
+    if (window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone === true) {
+        document.getElementById('install-hint').style.display = 'none';
+    }
+
+    // Initialize
+    initDate();
+    updateUI();
+
+</script>
+
+</body>
+</html>
